@@ -2,8 +2,10 @@ import tkinter as tk
 from tkinter import messagebox
 import json
 import os
+import csv
 
 json_file = "exercises.json"
+csv_file = "exercises.csv"
 
 def load_data():
     if os.path.exists(json_file):
@@ -11,11 +13,19 @@ def load_data():
             return json.load(file)
     return []
 
-def save_exercise(data):
+def save_exercise_json(data):
     exercises = load_data()
     exercises.append(data)
     with open(json_file, "w") as file:
         json.dump(exercises, file, indent=4)
+
+def save_exercise_csv(data):
+    file_exists = os.path.isfile(csv_file)
+    with open(csv_file, mode="a", newline="") as file:
+        writer = csv.writer(file)
+        if not file_exists:
+            writer.writerow(["Title", "Description", "Type", "Body Part", "Equipment", "Difficulty"])
+        writer.writerow([data['title'], data['description'], data['type'], data['bodypart'], data['equipment'], data['difficulty']])
 
 def submit(event=None):
     title = title_entry.get()
@@ -38,7 +48,9 @@ def submit(event=None):
         "difficulty": difficulty
     }
 
-    save_exercise(exercise_data)
+    save_exercise_json(exercise_data)
+    save_exercise_csv(exercise_data)
+    
     messagebox.showinfo("Success", "Exercise added successfully!")
     title_entry.delete(0, tk.END)
     description_entry.delete(0, tk.END)

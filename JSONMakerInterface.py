@@ -32,10 +32,10 @@ def convert_time():
         time_value = float(time_entry.get())
         if time_var.get() == "Seconds":
             time_entry.delete(0, tk.END)
-            time_entry.insert(0, str(time_value / 60))
+            time_entry.insert(0, str(time_value * 60))  # Convert seconds to minutes
         elif time_var.get() == "Minutes":
             time_entry.delete(0, tk.END)
-            time_entry.insert(0, str(time_value * 60))
+            time_entry.insert(0, str(time_value / 60))  # Convert minutes to seconds
     except ValueError:
         pass
 
@@ -75,7 +75,7 @@ def submit(event=None):
     difficulty_var.set("Easy")
     type_var.set("Strength")
     equipment_var.set("Body Weight")
-    time_var.set("Seconds")  # Set to Seconds on submit reset
+    time_var.set("Seconds")  # Set back to Seconds on submit reset
 
 root = tk.Tk()
 root.title("Exercise Tracker")

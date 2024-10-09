@@ -24,8 +24,20 @@ def save_exercise_csv(data):
     with open(csv_file, mode="a", newline="") as file:
         writer = csv.writer(file)
         if not file_exists:
-            writer.writerow(["Title", "Description", "Type", "Body Part", "Equipment", "Difficulty"])
-        writer.writerow([data['title'], data['description'], data['type'], data['bodypart'], data['equipment'], data['difficulty']])
+            writer.writerow(["Title", "Description", "Type", "Body Part", "Equipment", "Difficulty", "Time", "Time Unit"])
+        writer.writerow([data['title'], data['description'], data['type'], data['bodypart'], data['equipment'], data['difficulty'], data['time'], data['time_unit']])
+
+def convert_time():
+    try:
+        time_value = float(time_entry.get())
+        if time_var.get() == "Seconds":
+            time_entry.delete(0, tk.END)
+            time_entry.insert(0, str(time_value / 60))
+        elif time_var.get() == "Minutes":
+            time_entry.delete(0, tk.END)
+            time_entry.insert(0, str(time_value * 60))
+    except ValueError:
+        pass
 
 def submit(event=None):
     title = title_entry.get()
@@ -34,8 +46,10 @@ def submit(event=None):
     bodypart = bodypart_entry.get()
     equipment = equipment_var.get()
     difficulty = difficulty_var.get()
+    time_value = time_entry.get()
+    time_unit = time_var.get()
 
-    if not title or not exercise_type or not bodypart or not equipment or not difficulty:
+    if not title or not exercise_type or not bodypart or not equipment or not difficulty or not time_value:
         messagebox.showwarning("Missing Fields", "Please fill in all required fields!")
         return
 
@@ -45,7 +59,9 @@ def submit(event=None):
         "type": exercise_type,
         "bodypart": bodypart,
         "equipment": equipment,
-        "difficulty": difficulty
+        "difficulty": difficulty,
+        "time": time_value,
+        "time_unit": time_unit
     }
 
     save_exercise_json(exercise_data)
@@ -55,13 +71,25 @@ def submit(event=None):
     title_entry.delete(0, tk.END)
     description_entry.delete(0, tk.END)
     bodypart_entry.delete(0, tk.END)
+    time_entry.delete(0, tk.END)
     difficulty_var.set("Easy")
     type_var.set("Strength")
     equipment_var.set("Body Weight")
+    time_var.set("Seconds")  # Set to Seconds on submit reset
 
 root = tk.Tk()
 root.title("Exercise Tracker")
-root.geometry("400x500")
+root.geometry("400x600")
+
+window_width = 400
+window_height = 600
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+
+x = (screen_width // 2) - (window_width // 2)
+y = (screen_height // 2 - 100) - (window_height // 2)
+
+root.geometry(f"{window_width}x{window_height}+{x}+{y}")
 
 label_font = ("Helvetica", 12, "bold")
 
@@ -91,6 +119,15 @@ tk.Label(root, text="Difficulty: *", font=label_font).pack(pady=5)
 difficulty_var = tk.StringVar(value="Easy")
 difficulty_dropdown = tk.OptionMenu(root, difficulty_var, "Easy", "Medium", "Hard")
 difficulty_dropdown.pack(pady=5)
+
+tk.Label(root, text="Time: *", font=label_font).pack(pady=5)
+time_frame = tk.Frame(root)
+time_frame.pack(pady=5)
+time_entry = tk.Entry(time_frame, width=20)
+time_entry.pack(side=tk.LEFT, padx=5)
+time_var = tk.StringVar(value="Seconds")  # Default to Seconds
+time_dropdown = tk.OptionMenu(time_frame, time_var, "Seconds", "Minutes", command=lambda _: convert_time())
+time_dropdown.pack(side=tk.LEFT)
 
 submit_button = tk.Button(root, text="Submit", command=submit)
 submit_button.pack(pady=20)
